@@ -9,8 +9,8 @@ A rect consists of cells having its type and format.
 
 Rect operations:
 
-* head/tail holizontally/vertically on a block
-* merging blocks holizontally/vertiacally
+* head/tail holizontally/vertically on a rect
+* merging rects holizontally/vertiacally
 
 Rect generators:
 
