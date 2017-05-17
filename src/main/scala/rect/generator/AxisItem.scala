@@ -3,7 +3,7 @@ package rect.generator
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import rect.renderer.{Num, YYYY_MM_DD}
+import rect.renderer.{CellStyleKey, Num, YYYY_MM_DD}
 import util.DateUtil
 
 sealed trait ItemType

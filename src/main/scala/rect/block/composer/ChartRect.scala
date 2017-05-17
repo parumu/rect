@@ -3,6 +3,7 @@ package rect.block.composer
 import rect.Yx.Yx
 import rect.block.leaf.{HBarRect, SimpleRect, VBarRect}
 import rect.block.{Cells, Rect, RectCell, StrCell}
+import rect.renderer.Bold
 
 // consists of 3 rects
 case class ChartRect(

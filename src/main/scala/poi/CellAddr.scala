@@ -3,7 +3,7 @@ package poi
 import org.apache.poi.ss.util.CellReference
 
 case class CellAddr(row: Int, col: Int) {
-  val alphaNum = CellReference.convertNumToColString(col)
+  val alphaNum = CellReference.convertNumToColString(col) + (row + 1).toString
 
   def offset(x: (Int, Int)) = CellAddr(this.row + x._1, this.col + x._2)
 

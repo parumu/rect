@@ -1,12 +1,14 @@
 package rect.generator
 
+import rect.block.Rect
+
 trait RectGen {
   val tags: Map[String,String] = Map.empty
   val optConds: Option[List[Cond]] = None
   val optValFlts: Option[List[ValFilter]] = None
 
   def consume(inVus: List[ValUnit]): Unit
-  def generate: RectGen
+  def generate: Rect
 
   def applyConds(vu: ValUnit): Option[ValUnit] =
     optConds match {

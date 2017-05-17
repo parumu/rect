@@ -1,7 +1,7 @@
 package rect.block.leaf
 
 import rect.block.{Cells, NumCell, RectCell, StrCell}
-import rect.renderer.{Normal, Num}
+import rect.renderer.{CellStyleKey, Normal, Num}
 
 object CellRect {
   def ofStr(x: String, style: CellStyleKey = Normal) =

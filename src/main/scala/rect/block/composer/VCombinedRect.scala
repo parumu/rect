@@ -7,7 +7,7 @@ import rect.block.{Rect, RectCell}
 case class VCombinedRect(
   above: Rect,
   below: Rect,
-  private val ovrTags: Option[Map[String,String]] = None
+  val ovrTags: Option[Map[String,String]] = None
 ) extends Rect {
 
   // bottom left of above rect will be aligne to top left of left rect e.g.
@@ -65,7 +65,7 @@ case class VCombinedRect(
   def vTail(repeat: Int): Rect =
     if (repeat == aboveDim.y) padBelow
     else if (repeat > aboveDim.y) padBelow.vTail(repeat - aboveDim.y)
-    else padAbove.vTail(repeat) + padBelow
+    else padAbove.vTail(repeat) / padBelow
 
   def hHead(repeat: Int): Rect = padAbove.hHead(repeat) / padBelow.hHead(repeat)
   def hTail(repeat: Int): Rect = padAbove.hTail(repeat) / padBelow.hTail(repeat)

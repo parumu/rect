@@ -1,7 +1,9 @@
 package rect.block
 
 import rect.Yx.Yx
+import rect.block.composer.{HCombinedRect, VCombinedRect}
 import rect.block.leaf.SimpleRect
+import rect.renderer.CellStyleKey
 
 import scala.collection.mutable.{Map => MutMap}
 

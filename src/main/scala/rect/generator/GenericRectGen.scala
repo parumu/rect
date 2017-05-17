@@ -9,7 +9,7 @@ import scala.collection.mutable.{Map => MutMap}
 
 sealed trait Axis
 case class KeyAxis(item: AxisItem) extends Axis
-case class ValAxis(items: AxisItem*) exnteds Axis
+case class ValAxis(items: AxisItem*) extends Axis
 
 case class GenericRectGen(
   vAxis: Axis,
@@ -48,7 +48,7 @@ case class GenericRectGen(
       val keyVal = {
         val s = keyAxis.item.getVal(vu)
         optKeyLabelMap.map(_.get(s)) match {
-          case Some(Some(converted) => converted)
+          case Some(Some(converted)) => converted
           case _ => s
         }
       }
@@ -92,109 +92,109 @@ case class GenericRectGen(
         }
       })
     })
+  }
 
-    def generate: Rect = {
-      log.info(s"Started generating rect from $tags...")
+  def generate: Rect = {
+    log.info(s"Started generating rect from $tags...")
 
-      // first build cells with vAxis to be the key axis ans transpose later if needed
+    // first build cells with vAxis to be the key axis ans transpose later if needed
 
-      log.info("Building total item to val axis keys...")
-      val totalItem2ValAxisKeys = {
-        val itm2SelectorKeys = valAxis.items
-          .filter(_.typ == TotalItem)
-          .flatMap(x => x.selector.map(x -> _))
-          .toMap
+    log.info("Building total item to val axis keys...")
+    val totalItem2ValAxisKeys = {
+      val itm2SelectorKeys = valAxis.items
+        .filter(_.typ == TotalItem)
+        .flatMap(x => x.selector.map(x -> _))
+        .toMap
 
-        // if there is a non-Total TotalItem w/o selector
-        // create keys from total map and subtract select keys from it
-        // Then associate the keys to the TotalItem
-        val totalItemWoSel = valAxis.items.filter(x => {
-          x.typ == TotalItem &&
-          !x.isInstanceOf[Total] &&
-          x.selector.isEmpty
-        })
-        // There can't be multiple non-Total TotalItem without selector
-        if (totalItemWoSel.length > 1)
-          throw new IllegalStateException(
-            "There exists multiple non-total TotalItem w/o selector")
+      // if there is a non-Total TotalItem w/o selector
+      // create keys from total map and subtract select keys from it
+      // Then associate the keys to the TotalItem
+      val totalItemWoSel = valAxis.items.filter(x => {
+        x.typ == TotalItem &&
+        !x.isInstanceOf[Total] &&
+        x.selector.isEmpty
+      })
+      // There can't be multiple non-Total TotalItem without selector
+      if (totalItemWoSel.length > 1)
+        throw new IllegalStateException(
+          "There exists multiple non-total TotalItem w/o selector")
 
-        (totalItemWoSel.headOption match {
-          case None => Map.empty[AxisItem,List[String]]
-          case Some(itm) =>
-            // build keys from totals map valVal
-            val totalKeys = total.map(_._1._3).toSet
-            val selectorKeys = itm2SelectorKeys.values.flatten.toSet
-            Map(itm -> totalKeys.diff(selectorKeys).toList.distinct.sorted)
-        }) ++ itm2SelectorKeys
-      }
-
-      val keys = {
-        val accumKeys = total.map(_._1._1).toSet ++ attr.map(_._1._1).toSet
-
-        optKeyLabelList match {
-          case Some(keyLabelList) =>
-            keyLabelList.map(_._2).filter(accumKeys.contains) // sort in keyLabelList order
-
-          case None => accumKeys.toSeq.sorted
-        }
-      }
-
-      // build matrix
-      log.info("BUilding matrix...")
-
-      val cells: Seq[Seq[RectCell]] = {
-        val hdrAttrs: Option[CellStyleKey] = if (hdrBold) Some(Bold) else None
-
-        val dataRows = keys.map(key =>
-          RectCell(typ = StrCell, str = key, style = hdrAttrs.orNull) +: valAxis.items.flatMap(vaItem => {
-            vaItem.typ match {
-              case AttrItem =>
-                val v = attr.getOrElse((key, vaItem), RectCell.empty)
-                Seq(v)
-
-              case TotalItem =>
-                totalItem2ValAxisKeys.get(vaItem) match {
-                  case Some(vaKeys) =>
-                    vaKeys.map(vaKey =>
-                      total.getOrElse((key, vaItem, vaKey), RectCell.zero(style = vaItem.style.orNull))
-                    )
-                  case None => Seq(RectCell.zero(style = vaItem.style.orNull))
-                }
-            }
-          }))
-
-        if (inclHdr) {
-          val hdrRow = {
-            val keyAxisName = keyAxis.item.name
-            val valAxisNames = valAxis.items.flatMap {
-              case x: Total => List(x.name)
-              case x if x.typ == TotalItem =>
-                totalItem2ValAxisKeys.get(x) match {
-                  case Some(y) => y
-                  case None => throw new IllegalStateException(
-                    s"TotalItem keys are underined for $x"
-                  )
-                }
-              case x => List(x.name)
-            }
-            keyAxisName +: valAxisNames
-          }.map(v => RectCell(typ = StrCell, str = v, style = hdrAttrs.orNull))
-          hdrRow +: dataRows
-        } else dataRows
-      }
-
-      // transpose if hAxis is the key axis
-      val res = SimpleRect(
-        cells = {
-          val xs = Cells.of(cells)
-          if (hAxis == keyAxis) xs.transpose else xs
-        },
-        tags = tags,
-        optName = tags.get("name")
-      )
-      log.info("Done.")
-      res
+      (totalItemWoSel.headOption match {
+        case None => Map.empty[AxisItem,List[String]]
+        case Some(itm) =>
+          // build keys from totals map valVal
+          val totalKeys = total.map(_._1._3).toSet
+          val selectorKeys = itm2SelectorKeys.values.flatten.toSet
+          Map(itm -> totalKeys.diff(selectorKeys).toList.distinct.sorted)
+      }) ++ itm2SelectorKeys
     }
+
+    val keys = {
+      val accumKeys = total.map(_._1._1).toSet ++ attr.map(_._1._1).toSet
+
+      optKeyLabelList match {
+        case Some(keyLabelList) =>
+          keyLabelList.map(_._2).filter(accumKeys.contains) // sort in keyLabelList order
+
+        case None => accumKeys.toSeq.sorted
+      }
+    }
+
+    // build matrix
+    log.info("Building matrix...")
+
+    val cells: Seq[Seq[RectCell]] = {
+      val hdrAttrs: Option[CellStyleKey] = if (hdrBold) Some(Bold) else None
+
+      val dataRows = keys.map(key =>
+        RectCell(typ = StrCell, str = key, style = hdrAttrs.orNull) +: valAxis.items.flatMap(vaItem => {
+          vaItem.typ match {
+            case AttrItem =>
+              val v = attr.getOrElse((key, vaItem), RectCell.empty)
+              Seq(v)
+
+            case TotalItem =>
+              totalItem2ValAxisKeys.get(vaItem) match {
+                case Some(vaKeys) =>
+                  vaKeys.map(vaKey =>
+                    total.getOrElse((key, vaItem, vaKey), RectCell.zero(style = vaItem.style.orNull))
+                  )
+                case None => Seq(RectCell.zero(style = vaItem.style.orNull))
+              }
+          }
+        }))
+
+      if (inclHdr) {
+        val hdrRow = {
+          val keyAxisName = keyAxis.item.name
+          val valAxisNames = valAxis.items.flatMap {
+            case x: Total => List(x.name)
+            case x if x.typ == TotalItem =>
+              totalItem2ValAxisKeys.get(x) match {
+                case Some(y) => y
+                case None => throw new IllegalStateException(
+                  s"TotalItem keys are underined for $x"
+                )
+              }
+            case x => List(x.name)
+          }
+          keyAxisName +: valAxisNames
+        }.map(v => RectCell(typ = StrCell, str = v, style = hdrAttrs.orNull))
+        hdrRow +: dataRows
+      } else dataRows
+    }
+
+    // transpose if hAxis is the key axis
+    val res = SimpleRect(
+      cells = {
+        val xs = Cells.of(cells)
+        if (hAxis == keyAxis) xs.transpose else xs
+      },
+      tags = tags,
+      optName = tags.get("name")
+    )
+    log.info("Done.")
+    res
   }
 }
 

@@ -3,7 +3,7 @@ package rect.block
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import rect.renderer.Num
+import rect.renderer.{CellStyleKey, Num}
 import util.DateUtil
 
 abstract class CellType

@@ -5,7 +5,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import rect.Yx.Yx
 import rect.block.Rect
 
-import scala.collection.mutable.{Map, Map => MutMap}
+import scala.collection.mutable.{Map => MutMap}
 import scala.util.matching.Regex
 
 /*
@@ -30,7 +30,7 @@ import scala.util.matching.Regex
   ** Excep for attr and rect name, expr is case-insensitive
 */
 case class FormulaExpr(rects: Rect*) {
-  val tagRe = new Regex(""" #\{([^}]+\}""", "expr")
+  val tagRe = new Regex("""#\{([^}]+)\}""", "expr")
   val exprRe = """(?i)(Self|SelfCol|SelfRow|AbsSelf|AbsSelfCol|AbsSelfRow|\(\s*\d+,\s*\d+\)|Height|Width|\$\w+)(?:@(\w+))?""".r
   val coordRe = """\(\s*(\d+),\s*(\d+)\)""".r
   val attrRe = """\$(\w+)""".r
