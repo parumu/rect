@@ -1,0 +1,96 @@
+- background
+reports are generated with similar contents or formatting.
+
+one report stack charts for various risk measures virtically for one scenario and lines up charts for different scenarios holizontally
+one report create a separate file for each risk type and scenario combination
+one report horizontally shows attributes of a trade and dumps all trades
+one report generates a two-dimentional chart
+
+Many Excel reports share tabs with identical contents with different foramt
+
+Output format varies from script to script - text, Excel spreadsheet, email etc
+
+Data source - multiple types of query results, a file in a network share or a file only accessible through http
+
+To cover these variation, many scripts has been written in various languages with its own data retrievaland report rendering logic
+
+Moreover, since there are downstream tools that are dependent on the format of currently generated reports, the output format needs to stay unchanged
+
+To reduce copy-and-paste, common logics are put into a library, but it was done in such a way that one function covers all the variations. That resulted in highly complex code with many problems.
+
+- design
+  - basic idea
+    - report contents can be broken down to set of pages
+    - page can be broken down to a composition of rectangles
+    - hight level DSL can define report as manipulation/creation on rectangles
+    - typical formatting pattern can be captured by rectarngle composer
+
+  - rectangle compostion
+    - leaf rectangle
+      - CellRect
+      - EmptyRect
+      - V/HBarRect
+      - PadRect
+      - SimpleRect
+    - composer rectangle
+      - V/HCombinedRect (shortcut / and +)
+      - ChartRect
+    - others
+      - v/hSandwitch (similar idea to join on list with sep)
+      - toolkit can be expanded easily as needed
+
+  - association between data source and rectangle (many to one)
+  
+  - rectangle generation
+    - GenericRectGen
+      - Key axis and value axis
+        - assignment to vertical/horizontal axes
+        - columns for value axis that map to key axis
+      - condition/data filters
+      - different data souces converted into a stream of data container
+      - consumes the data stream to build rectangle contents
+    - other rect generators can be built easily
+      - one that converts text represented chart into rect
+  - output generation
+    - ExcelRenderer
+      - resolve expressions embedded in formula
+        - compute cell location in a local rectangle in the final rectangle
+        - resolve attribute nae to value
+        - get height/width of the final rectangle
+        - language simple enough to implement w/ regex and single level branching
+      - maps each rectangle to sheet
+    - TextRenderer
+      - write a rectangle as a csv
+
+  ** functionalitiies not covered at this library level
+  - DSL script based on rectabgle library
+  - script evaluation at runtime
+  - data stream generation with multithreads
+
+- issues
+  - slowness
+    - 400 scenarios to run with 20,000 trades each
+      - naive implemenration took several hours to finish
+      - solution
+        - execute independent parts of comupation in different threads
+          i.e. different thread for each scenario
+        - optimize data structure
+          - cell container
+            - cells in both map and 2-dim list for faster access
+            - support transpose as view w/o changing contained data
+            - support expanding dimention w/o changing contained data
+          - rect
+            - support decomposition for faster rendering
+          - rect cell
+            - get rid of polymorphism
+              - ugly, space-consuming but faster
+            - composer rect
+              - avoid coping cells on head/tail operations and instead provide views
+            - ExcelRectRenderer
+              - decompose final rect into leaf rects to avoid cell searching on ract tree for each cell
+              - immutable variable to mutalble variable
+              - replace foreach w/ while loop
+              - make function call inline
+            - FormulaExpr
+              - memoize computed values
+              
