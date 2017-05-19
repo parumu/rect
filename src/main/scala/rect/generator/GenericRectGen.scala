@@ -39,7 +39,7 @@ case class GenericRectGen(
   // inVus are converted to RectCell and stored in:
   // - Attr map: (KeyAxis key, ValAxisItem) -> val
   // - Total map: (KeyAxis key, ValAxisItem, val) -> total
-  def consume(inVus: List[ValUnit]): Unit = {
+  def consume(inVus: List[ValUnit]): GenericRectGen = {
     inVus.flatMap(applyConds).foreach(srcVu => {
       val vu = optValFlts.map(valFlts => {
         valFlts.foldLeft(srcVu)((acc, valFlt) => valFlt.apply(acc))
@@ -92,6 +92,7 @@ case class GenericRectGen(
         }
       })
     })
+    this
   }
 
   def generate: Rect = {

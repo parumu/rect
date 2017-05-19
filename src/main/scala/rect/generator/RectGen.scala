@@ -7,7 +7,7 @@ trait RectGen {
   val optConds: Option[List[Cond]] = None
   val optValFlts: Option[List[ValFilter]] = None
 
-  def consume(inVus: List[ValUnit]): Unit
+  def consume(inVus: List[ValUnit]): RectGen
   def generate: Rect
 
   def applyConds(vu: ValUnit): Option[ValUnit] =

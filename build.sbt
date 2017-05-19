@@ -11,5 +11,7 @@ libraryDependencies ++= Seq(
   "org.apache.poi" % "poi" % "3.13",
   "org.apache.poi" % "poi-ooxml" % "3.13",
   "org.apache.poi" % "poi-ooxml-schemas" % "3.13",
-  "org.apache.poi" % "ooxml-schemas" % "1.3"
+  "org.apache.poi" % "ooxml-schemas" % "1.3",
+  "junit" % "junit" % "4.12",
+  "org.scalatest" % "scalatest_2.12" % "3.0.3"
 )
